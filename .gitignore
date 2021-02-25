@@ -1,0 +1,12 @@
+# R config files
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# temporary files
+sbox/
+
+# data files
+*.dta
+*.csv
