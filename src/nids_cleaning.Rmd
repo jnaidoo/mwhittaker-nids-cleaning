@@ -1,0 +1,108 @@
+---
+title: "nids_cleaning"
+author: "Megan"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r packages, include=FALSE}
+packages <- c("data.table",
+              "descr",
+              "dplyr",
+              "ggplot2", 
+              "ggpubr",
+              "haven",
+              "kableExtra",
+              "knitr",
+              "labelled",
+              "lessR",
+              "lubridate",
+              "naniar",
+              "readxl", 
+              "rmarkdown",
+              "RColorBrewer",
+              "rticles",
+              "skimr",
+              "stargazer",
+              "tidyr", 
+              "tidyverse"
+              )
+invisible(lapply(packages, library, character.only = TRUE))
+rm(packages)
+```
+
+```{r raw data files, echo=FALSE}
+
+wave_1_adult <- read_dta("/Users/meganwhittaker/Thesis/mwhittaker-nids-cleaning/data/raw/wave_1/Adult_W1_Anon_V7.0.0.dta") 
+
+```
+
+
+```{r , echo=FALSE}
+
+# AGE AT FIRST BIRTH
+
+wave_1_adult <- unlabelled(wave_1_adult)
+
+# Non-response codes from Introduction to NIDS data; added 16 - "Don't know" 
+na_numbers <- c(-3, -5, -8, -9, 3333, 5555, 8888, 9999, 33, 55, 88, 99, 16)
+
+# Change all non-response codes to NA; replace_with_na_all takes forever to run, even if it's done after subsetting (?); 16s still appear (?)
+w1_birthyears <-  wave_1_adult %>%
+  select(pid, w1_a_dob_m, w1_a_dob_y, contains("w1_a_bhdob")) %>% 
+  replace_with_na_all(condition = ~.x %in% na_numbers) 
+  
+# Calculated age at first child very rudimentarily (converted to months first); had to include the ifelse statement due to the 16s still appearing
+w1_birthyears <-  w1_birthyears %>% 
+  filter(w1_a_bhdob_y1 > w1_a_dob_y &
+           w1_a_bhdob_y1 - w1_a_dob_y >= 13 &
+           w1_a_bhdob_y1 - w1_a_dob_y <= 65) %>%
+  mutate(age_firstbirth_y = (w1_a_bhdob_y1 - w1_a_dob_y)*12,
+         age_firstbirth_m = w1_a_bhdob_m1 - w1_a_dob_m,
+         age_firstbirth = ifelse(age_firstbirth_m >= - 11 & age_firstbirth_m <= 11 , (age_firstbirth_y + age_firstbirth_m)/12, (age_firstbirth_y)/12))
+
+Histogram(age_firstbirth, w1_birthyears, xlab = "Age at first birth", ylab = "Frequency", fill = "reds", color = "transparent")
+
+
+```
+
+
+
+```{r , echo=FALSE}
+
+
+
+```
+
+
+
+```{r , echo=FALSE}
+
+
+
+```
+
+
+
+```{r , echo=FALSE}
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
