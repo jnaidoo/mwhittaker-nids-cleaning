@@ -64,45 +64,11 @@ w1_birthyears <-  w1_birthyears %>%
          age_firstbirth_m = w1_a_bhdob_m1 - w1_a_dob_m,
          age_firstbirth = ifelse(age_firstbirth_m >= - 11 & age_firstbirth_m <= 11 , (age_firstbirth_y + age_firstbirth_m)/12, (age_firstbirth_y)/12))
 
-Histogram(age_firstbirth, w1_birthyears, xlab = "Age at first birth", ylab = "Frequency", fill = "reds", color = "transparent")
 
-
-```
-
-
-
-```{r , echo=FALSE}
-
-
+d <- w1_birthyears
+Density(age_firstbirth, main = "Wave 1: age at first birth", xlab = "Age", y_axis = T, x.min = 0)
 
 ```
-
-
-
-```{r , echo=FALSE}
-
-
-
-```
-
-
-
-```{r , echo=FALSE}
-
-
-
-```
-
-
-
-
-
-
-
-
-
-
-
 
 
 
