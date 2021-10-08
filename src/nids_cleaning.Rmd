@@ -61,7 +61,7 @@ w1_birthyears <-  w1_birthyears %>%
                                  (child_1_birth_year - mother_birth_year)))
 
 
-Histogram(age_firstbirth, w1_birthyears, xlab = "Age at first birth", ylab = "Frequency", fill = "reds", color = "transparent")
+hist(w1_birthyears$age_firstbirth, main = "Age at first birth - wave 1", xlab = "Age", ylab = "Frequency", col = "transparent")
 
 ```
 
