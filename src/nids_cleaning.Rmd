@@ -19,7 +19,7 @@ rm(packages)
 
 ```{r raw_data_files, echo=FALSE}
 
-wave_1_adult <- read_dta("/Users/meganwhittaker/Thesis/mwhittaker-nids-cleaning/data/raw/wave_1/Adult_W1_Anon_V7.0.0.dta") %>% 
+wave_1_adult <- read_dta("../data/raw/wave_1/Adult_W1_Anon_V7.0.0.dta") %>% 
   zap_labels()
 
 ```
