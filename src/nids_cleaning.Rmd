@@ -1,0 +1,82 @@
+---
+title: "nids_cleaning"
+author: "Megan"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r packages, include=FALSE}
+
+library(haven)
+#library(naniar)
+library(tidyverse)
+
+# this was a more elegant way of doing this, but it chokes if one of the packages is missing (e.g. due to an R update)
+# in any case, naniar is not even used here
+# packages <- c("haven", "naniar", "tidyverse")
+# invisible(lapply(packages, library, character.only = TRUE))
+# rm(packages)
+```
+
+```{r raw data files, echo=FALSE}
+
+wave_1_adult <- read_dta("../data/raw/wave_1/Adult_W1_Anon_V7.0.0.dta") %>% zap_labels()
+
+```
+
+
+```{r , echo=FALSE}
+
+# select and rename variables
+w1_birthyears <-  wave_1_adult %>%
+  select(pid, w1_a_dob_m, w1_a_dob_y, w1_a_bhdob_m1, w1_a_bhdob_y1) %>%
+  rename(mother_birth_year = w1_a_dob_y,
+         mother_birth_month = w1_a_dob_m,
+         child_1_birth_year = w1_a_bhdob_y1,
+         child_1_birth_month = w1_a_bhdob_m1)
+```
+
+
+```{r , echo=FALSE}
+# now replace invalid codes with NA
+
+w1_birthyears <- w1_birthyears %>% 
+  mutate(across(ends_with("birth_month")), na_if(., 99)) %>%
+  mutate(across(ends_with("birth_month")), na_if(., 88)) %>%
+  mutate(across(ends_with("birth_month")), na_if(., 33))
+  
+w1_birthyears <- w1_birthyears %>% 
+  mutate(across(ends_with("birth_year")), na_if(., 9999)) %>%
+  mutate(across(ends_with("birth_year")), na_if(., 8888)) %>%
+  mutate(across(ends_with("birth_year")), na_if(., 3333))
+```
+
+
+```{r , echo=FALSE}
+# Calculated age at first child very rudimentarily (converted to months first); had to include the ifelse statement due to the 16s still appearing
+w1_birthyears <-  w1_birthyears %>% 
+  filter(child_1_birth_year > mother_birth_year &
+           child_1_birth_year - mother_birth_year >= 13 &
+           child_1_birth_year - mother_birth_year <= 65) %>%
+  mutate(age_firstbirth_y = (child_1_birth_year - mother_birth_year)*12,
+         age_firstbirth_m = child_1_birth_month - mother_birth_month,
+         age_firstbirth = ifelse(age_firstbirth_m >= - 11 & age_firstbirth_m <= 11 , (age_firstbirth_y + age_firstbirth_m)/12, (age_firstbirth_y)/12))
+```
+
+
+```{r , echo=FALSE}
+w1_birthyears %>% ggplot(aes(x = age_firstbirth)) +
+  geom_density() +
+  labs(title = "Age at first birth",
+       caption = "Source: NIDS Wave 1",
+       x = "Age (years)",
+       y = "") +
+  theme_light()
+# Density(age_firstbirth, main = "Wave 1: age at first birth", xlab = "Age", y_axis = T, x.min = 0)
+```
+
+
+
