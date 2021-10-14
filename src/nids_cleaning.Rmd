@@ -10,7 +10,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r packages, include=FALSE}
 packages <- c("haven",
-              "naniar",
               "tidyverse"
               )
 invisible(lapply(packages, library, character.only = TRUE))
@@ -22,14 +21,15 @@ wave_1_adult <- read_dta("../data/raw/wave_1/Adult_W1_Anon_V7.0.0.dta") %>%
   zap_labels()
 ```
 
-```{r age_firstbirth, echo=FALSE}
-# AGE AT FIRST BIRTH
-w1_birthyears <- wave_1_adult %>%
+```{r , echo=FALSE}
+# select and rename variables
+w1_birthyears <-  wave_1_adult %>%
   select(pid, w1_a_dob_m, w1_a_dob_y, w1_a_bhdob_m1, w1_a_bhdob_y1) %>%
   rename(mother_birth_year = w1_a_dob_y,
          mother_birth_month = w1_a_dob_m,
          child_1_birth_year = w1_a_bhdob_y1,
          child_1_birth_month = w1_a_bhdob_m1)
+
 # Non-response codes for year and month (NIDS Panel User Manual; 2018, p.27):
 # month: 99, 88, 33
 # year: 9999, 8888, 3333
@@ -53,5 +53,24 @@ w1_birthyears <-  w1_birthyears %>%
                                    !is.na(child_1_birth_month - mother_birth_month),
                                  floor((12*(child_1_birth_year - mother_birth_year) + child_1_birth_month - mother_birth_month)/12),
                                  (child_1_birth_year - mother_birth_year)))
+```
+
+
+```{r}
+# generate histogram
 hist(w1_birthyears$age_firstbirth, main = "Age at first birth - wave 1", xlab = "Age", ylab = "Frequency", col = "transparent")
 ```
+
+
+```{r , echo=FALSE}
+# an alternative plot (smoothed density)
+
+w1_birthyears %>% ggplot(aes(x = age_firstbirth)) +
+  geom_density() +
+  labs(title = "Age at first birth",
+       caption = "Source: NIDS Wave 1",
+       x = "Age (years)",
+       y = "") +
+  theme_light()
+```
+

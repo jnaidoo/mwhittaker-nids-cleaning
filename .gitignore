@@ -4,6 +4,10 @@
 .RData
 .Ruserdata
 
+# system files
+*.empty_dir
+*.DS_Store
+
 # temporary files
 sbox/
 
