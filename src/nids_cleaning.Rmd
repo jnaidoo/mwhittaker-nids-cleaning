@@ -74,3 +74,58 @@ w1_birthyears %>% ggplot(aes(x = age_firstbirth)) +
   theme_light()
 ```
 
+
+```{r , echo=FALSE}
+
+# select and rename variables
+w1_bh <-  wave_1_adult %>%
+  filter(w1_a_gen == 2) %>%
+  select(pid, w1_a_bhlive_n, w1_a_bhali_n, w1_a_bhdth_n, contains("bhdob_y")) %>%
+  rename(child_living_num = w1_a_bhlive_n,
+         child_alive_num = w1_a_bhali_n,
+         child_dead_num = w1_a_bhdth_n,
+         child_1_birth_year = w1_a_bhdob_y1,
+         child_2_birth_year = w1_a_bhdob_y2,
+         child_3_birth_year = w1_a_bhdob_y3,
+         child_4_birth_year = w1_a_bhdob_y4,
+         child_5_birth_year = w1_a_bhdob_y5,
+         child_6_birth_year = w1_a_bhdob_y6,
+         child_7_birth_year = w1_a_bhdob_y7,
+         child_8_birth_year = w1_a_bhdob_y8,
+         child_9_birth_year = w1_a_bhdob_y9,
+         child_10_birth_year = w1_a_bhdob_y10,
+         child_11_birth_year = w1_a_bhdob_y11,
+         child_12_birth_year = w1_a_bhdob_y12,
+         child_13_birth_year = w1_a_bhdob_y13,
+         child_14_birth_year = w1_a_bhdob_y14,
+         child_15_birth_year = w1_a_bhdob_y15,
+         child_16_birth_year = w1_a_bhdob_y16,
+         child_17_birth_year = w1_a_bhdob_y17) 
+
+# Non-response codes for year and month (NIDS Panel User Manual; 2018, p.27):
+# month: 99, 88, 33
+# year: 9999, 8888, 3333
+# Change non-response codes to NA
+w1_bh <-  w1_bh %>%
+  mutate(across(ends_with("birth_year")), na_if(., 9999)) %>%
+  mutate(across(ends_with("birth_year")), na_if(., 8888)) %>%
+  mutate(across(ends_with("birth_year")), na_if(., 3333))
+
+# Sum of children living with mother, children alive but not living with mother and children who have passed to get number of births
+w1_bh <-  w1_bh %>%
+  mutate(num_births = rowSums((w1_bh[,2:4]), na.rm = TRUE))
+
+# Number of births for which birth timing data is available
+w1_birthyears <-  w1_bh %>%
+  select(ends_with("birth_year")) %>%
+  sjmisc::row_count(count = NA, var = "num_na", append = TRUE)
+
+w1_bh <-  w1_bh %>%
+  mutate(num_bhdata = 17 - w1_birthyears$num_na)
+
+# Observations for which number of births don't equal birth data
+w1_bh_neq <-  w1_bh %>% 
+  filter(num_births != num_bhdata)
+
+```
+
