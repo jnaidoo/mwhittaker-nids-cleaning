@@ -116,9 +116,8 @@ w1_bh <-  w1_bh %>%
   mutate(recorded_parity = child_coresident_num + child_nonresident_alive_num + child_nonresident_dead_num)
 
 # Number of births for which birth timing data is available
-w1_birthyears <-  w1_bh %>%
-  select(ends_with("birth_year")) %>%
-  sjmisc::row_count(count = NA, var = "num_na", append = TRUE)
+w1_bh <-  w1_bh %>%
+  sjmisc::row_count(count = NA, ends_with("birth_year"), var = "num_births_missing_yr", append = TRUE)
 
 w1_bh <-  w1_bh %>%
 mutate(implied_parity = 17 - num_births_missing_yr)
