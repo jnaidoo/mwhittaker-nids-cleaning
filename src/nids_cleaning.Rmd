@@ -81,9 +81,9 @@ w1_birthyears %>% ggplot(aes(x = age_firstbirth)) +
 w1_bh <-  wave_1_adult %>%
   filter(w1_a_gen == 2) %>%
   select(pid, w1_a_bhlive_n, w1_a_bhali_n, w1_a_bhdth_n, contains("bhdob_y")) %>%
-  rename(child_living_num = w1_a_bhlive_n,
-         child_alive_num = w1_a_bhali_n,
-         child_dead_num = w1_a_bhdth_n,
+ rename(child_coresident_num = w1_a_bhlive_n,
+         child_nonresident_alive_num = w1_a_bhali_n,
+         child_nonresident_dead_num = w1_a_bhdth_n,
          child_1_birth_year = w1_a_bhdob_y1,
          child_2_birth_year = w1_a_bhdob_y2,
          child_3_birth_year = w1_a_bhdob_y3,
