@@ -113,7 +113,7 @@ w1_bh <-  w1_bh %>%
 
 # Sum of children living with mother, children alive but not living with mother and children who have passed to get number of births
 w1_bh <-  w1_bh %>%
-  mutate(num_births = rowSums((w1_bh[,2:4]), na.rm = TRUE))
+  mutate(recorded_parity = child_coresident_num + child_nonresident_alive_num + child_nonresident_dead_num)
 
 # Number of births for which birth timing data is available
 w1_birthyears <-  w1_bh %>%
