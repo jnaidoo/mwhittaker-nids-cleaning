@@ -124,7 +124,7 @@ mutate(implied_parity = 17 - num_births_missing_yr)
 
 # Observations for which number of births don't equal birth data
 w1_bh_neq <-  w1_bh %>% 
-  filter(num_births != num_bhdata)
+  filter(recorded_parity != implied_parity)
 
 ```
 
