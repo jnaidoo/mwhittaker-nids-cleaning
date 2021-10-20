@@ -121,7 +121,7 @@ w1_birthyears <-  w1_bh %>%
   sjmisc::row_count(count = NA, var = "num_na", append = TRUE)
 
 w1_bh <-  w1_bh %>%
-  mutate(num_bhdata = 17 - w1_birthyears$num_na)
+mutate(implied_parity = 17 - num_births_missing_yr)
 
 # Observations for which number of births don't equal birth data
 w1_bh_neq <-  w1_bh %>% 
