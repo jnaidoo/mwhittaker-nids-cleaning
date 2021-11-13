@@ -8,6 +8,7 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
 ```{r packages, include=FALSE}
 packages <- c("haven",
               "tidyverse"
@@ -16,115 +17,259 @@ invisible(lapply(packages, library, character.only = TRUE))
 rm(packages)
 ```
 
+
 ```{r raw_data_files, echo=FALSE}
-wave_1_adult <- read_dta("../data/raw/wave_1/Adult_W1_Anon_V7.0.0.dta") %>% 
+
+w1_adult <- read_dta("../data/raw/wave_1/Adult_W1_Anon_V7.0.0.dta") %>% 
   zap_labels()
+
+w1_indderived <- read_dta("../data/raw/wave_1/indderived_W1_Anon_V7.0.0.dta") %>% 
+  zap_labels()
+
 ```
 
+
 ```{r , echo=FALSE}
-# select and rename variables
-w1_birthyears <-  wave_1_adult %>%
-  select(pid, w1_a_dob_m, w1_a_dob_y, w1_a_bhdob_m1, w1_a_bhdob_y1) %>%
+
+# filter (African women), select and rename variables 
+w1_birth_history <-  w1_adult %>%
+  filter(w1_a_gen == 2 & w1_a_popgrp == 1) %>%
+  select(pid, w1_a_dob_m, w1_a_dob_y, contains("bhdob_m"), contains("bhdob_y"), w1_a_bhlive_n, w1_a_bhali_n, w1_a_bhdth_n) %>%
   rename(mother_birth_year = w1_a_dob_y,
          mother_birth_month = w1_a_dob_m,
-         child_1_birth_year = w1_a_bhdob_y1,
-         child_1_birth_month = w1_a_bhdob_m1)
+         
+         child1_birth_year = w1_a_bhdob_y1,
+         child1_birth_month = w1_a_bhdob_m1,
+         
+         child2_birth_year = w1_a_bhdob_y2,
+         child2_birth_month = w1_a_bhdob_m2,
+         
+         child3_birth_year = w1_a_bhdob_y3,
+         child3_birth_month = w1_a_bhdob_m3,
+         
+         child4_birth_year = w1_a_bhdob_y4,
+         child4_birth_month = w1_a_bhdob_m4,
+         
+         child5_birth_year = w1_a_bhdob_y5,
+         child5_birth_month = w1_a_bhdob_m5,
+         
+         child6_birth_year = w1_a_bhdob_y6,
+         child6_birth_month = w1_a_bhdob_m6,
+         
+         child7_birth_year = w1_a_bhdob_y7,
+         child7_birth_month = w1_a_bhdob_m7,
+         
+         child8_birth_year = w1_a_bhdob_y8,
+         child8_birth_month = w1_a_bhdob_m8,
+         
+         child9_birth_year = w1_a_bhdob_y9,
+         child9_birth_month = w1_a_bhdob_m9,
+         
+         child10_birth_year = w1_a_bhdob_y10,
+         child10_birth_month = w1_a_bhdob_m10,
+         
+         child11_birth_year = w1_a_bhdob_y11,
+         child11_birth_month = w1_a_bhdob_m11,
+         
+         child12_birth_year = w1_a_bhdob_y12,
+         child12_birth_month = w1_a_bhdob_m12,
+         
+         child13_birth_year = w1_a_bhdob_y13,
+         child13_birth_month = w1_a_bhdob_m13,
+         
+         child14_birth_year = w1_a_bhdob_y14,
+         child14_birth_month = w1_a_bhdob_m14,
+         
+         child15_birth_year = w1_a_bhdob_y15,
+         child15_birth_month = w1_a_bhdob_m15,
+         
+         child16_birth_year = w1_a_bhdob_y16,
+         child16_birth_month = w1_a_bhdob_m16,
+         
+         child17_birth_year = w1_a_bhdob_y17,
+         child17_birth_month = w1_a_bhdob_m17,
+         
+         child_coresident_num = w1_a_bhlive_n,
+         child_nonresident_alive_num = w1_a_bhali_n,
+         child_nonresident_dead_num = w1_a_bhdth_n) 
 
 # Non-response codes for year and month (NIDS Panel User Manual; 2018, p.27):
 # month: 99, 88, 33
 # year: 9999, 8888, 3333
 # Change non-response codes to NA
-w1_birthyears <-  w1_birthyears %>%
+w1_birth_history <-  w1_birth_history %>%
   mutate(across(ends_with("birth_month")), na_if(., 99)) %>%
   mutate(across(ends_with("birth_month")), na_if(., 88)) %>%
   mutate(across(ends_with("birth_month")), na_if(., 33)) 
-w1_birthyears <-  w1_birthyears %>%
+
+w1_birth_history <-  w1_birth_history %>%
   mutate(across(ends_with("birth_year")), na_if(., 9999)) %>%
   mutate(across(ends_with("birth_year")), na_if(., 8888)) %>%
-  mutate(across(ends_with("birth_year")), na_if(., 3333))  
-  
-# Age at first birth
-w1_birthyears <-  w1_birthyears %>%
-  filter(child_1_birth_year > mother_birth_year &
-           child_1_birth_year - mother_birth_year >= 14 &
-           child_1_birth_year - mother_birth_year <= 64) %>%
-  mutate(age_firstbirth = ifelse(child_1_birth_month - mother_birth_month >= -11 & 
-                                   child_1_birth_month - mother_birth_month <= 11 &
-                                   !is.na(child_1_birth_month - mother_birth_month),
-                                 floor((12*(child_1_birth_year - mother_birth_year) + child_1_birth_month - mother_birth_month)/12),
-                                 (child_1_birth_year - mother_birth_year)))
+  mutate(across(ends_with("birth_year")), na_if(., 3333))
+
 ```
 
-
-```{r}
-# generate histogram
-hist(w1_birthyears$age_firstbirth, main = "Age at first birth - wave 1", xlab = "Age", ylab = "Frequency", col = "transparent")
-```
 
 
 ```{r , echo=FALSE}
-# an alternative plot (smoothed density)
 
-w1_birthyears %>% ggplot(aes(x = age_firstbirth)) +
+# Sum of children living with mother, children alive but not living with mother and children who have passed to get number of births
+w1_birth_history <-  w1_birth_history %>%
+  mutate(recorded_parity = rowSums(select(., child_coresident_num, child_nonresident_alive_num, child_nonresident_dead_num), na.rm=TRUE))
+
+# Number of births for which birth timing data is available
+w1_birth_history <-  w1_birth_history %>%
+  sjmisc::row_count(count = NA, ends_with("birth_year"), var = "num_births_missing_yr", append = TRUE) %>%
+  mutate(implied_parity = 17 - num_births_missing_yr)
+
+```
+
+
+
+```{r , echo=FALSE}
+
+# Recorded vs implied parity graph - observations not equal
+w1_birth_history %>%
+  filter(recorded_parity != implied_parity) %>%
+  ggplot(., aes(x = recorded_parity, y = implied_parity)) + geom_point()
+
+```
+
+
+
+```{r , echo=FALSE}
+
+# Age at first birth
+w1_birth_history <-  w1_birth_history %>%
+  filter(child1_birth_year > mother_birth_year &
+           child1_birth_year - mother_birth_year >= 14 &
+           child1_birth_year - mother_birth_year <= 64
+         ) %>%
+  mutate(age_birth1 = ifelse(child1_birth_month - mother_birth_month >= -11 & 
+                                   child1_birth_month - mother_birth_month <= 11 &
+                                   !is.na(child1_birth_month - mother_birth_month),
+                                 floor((12*(child1_birth_year - mother_birth_year) + child1_birth_month - mother_birth_month)/12),
+                                 (child1_birth_year - mother_birth_year)))
+```
+
+
+
+```{r , echo=FALSE}
+
+# age at first birth plot (smoothed density)
+w1_birth_history %>% ggplot(aes(x = age_birth1)) +
   geom_density() +
   labs(title = "Age at first birth",
        caption = "Source: NIDS Wave 1",
        x = "Age (years)",
        y = "") +
   theme_light()
+
 ```
+
 
 
 ```{r , echo=FALSE}
 
-# select and rename variables
-w1_bh <-  wave_1_adult %>%
-  filter(w1_a_gen == 2) %>%
-  select(pid, w1_a_bhlive_n, w1_a_bhali_n, w1_a_bhdth_n, contains("bhdob_y")) %>%
- rename(child_coresident_num = w1_a_bhlive_n,
-         child_nonresident_alive_num = w1_a_bhali_n,
-         child_nonresident_dead_num = w1_a_bhdth_n,
-         child_1_birth_year = w1_a_bhdob_y1,
-         child_2_birth_year = w1_a_bhdob_y2,
-         child_3_birth_year = w1_a_bhdob_y3,
-         child_4_birth_year = w1_a_bhdob_y4,
-         child_5_birth_year = w1_a_bhdob_y5,
-         child_6_birth_year = w1_a_bhdob_y6,
-         child_7_birth_year = w1_a_bhdob_y7,
-         child_8_birth_year = w1_a_bhdob_y8,
-         child_9_birth_year = w1_a_bhdob_y9,
-         child_10_birth_year = w1_a_bhdob_y10,
-         child_11_birth_year = w1_a_bhdob_y11,
-         child_12_birth_year = w1_a_bhdob_y12,
-         child_13_birth_year = w1_a_bhdob_y13,
-         child_14_birth_year = w1_a_bhdob_y14,
-         child_15_birth_year = w1_a_bhdob_y15,
-         child_16_birth_year = w1_a_bhdob_y16,
-         child_17_birth_year = w1_a_bhdob_y17) 
+# Age at second birth
+w1_birth_history <-  w1_birth_history %>%
+  filter(child1_birth_year > mother_birth_year &
+           child1_birth_year - mother_birth_year >= 14 &
+           child1_birth_year - mother_birth_year <= 64 &
+           child2_birth_year >= child1_birth_year
+         ) %>%
+  mutate(age_birth2 = ifelse(child2_birth_month - mother_birth_month >= -11 & 
+                                   child2_birth_month - mother_birth_month <= 11 &
+                                   !is.na(child2_birth_month - mother_birth_month),
+                                 floor((12*(child2_birth_year - mother_birth_year) + child2_birth_month - mother_birth_month)/12),
+                                 (child2_birth_year - mother_birth_year)))
 
-# Non-response codes for year and month (NIDS Panel User Manual; 2018, p.27):
-# month: 99, 88, 33
-# year: 9999, 8888, 3333
-# Change non-response codes to NA
-w1_bh <-  w1_bh %>%
-  mutate(across(ends_with("birth_year")), na_if(., 9999)) %>%
-  mutate(across(ends_with("birth_year")), na_if(., 8888)) %>%
-  mutate(across(ends_with("birth_year")), na_if(., 3333))
-
-# Sum of children living with mother, children alive but not living with mother and children who have passed to get number of births
-w1_bh <-  w1_bh %>%
-  mutate(recorded_parity = rowSums(select(., child_coresident_num, child_nonresident_alive_num, child_nonresident_dead_num), na.rm=TRUE))
-
-# Number of births for which birth timing data is available
-w1_bh <-  w1_bh %>%
-  sjmisc::row_count(count = NA, ends_with("birth_year"), var = "num_births_missing_yr", append = TRUE)
-
-w1_bh <-  w1_bh %>%
-mutate(implied_parity = 17 - num_births_missing_yr)
-
-# Observations for which number of births don't equal birth data
-w1_bh_neq <-  w1_bh %>% 
-  filter(recorded_parity != implied_parity)
 
 ```
 
+
+
+```{r , echo=FALSE}
+
+# Joint density by birth cohorts
+w1_birth_history <- w1_birth_history %>%
+    mutate(mother_age_group = case_when(
+      mother_birth_year <= 1909 ~ "1900-1909",
+      mother_birth_year >= 1910 & mother_birth_year <= 1919 ~ "1910-1919",
+      mother_birth_year >= 1920 & mother_birth_year <= 1929 ~ "1920-1929",
+      mother_birth_year >= 1930 & mother_birth_year <= 1939 ~ "1930-1939",
+      mother_birth_year >= 1940 & mother_birth_year <= 1949 ~ "1940-1949",
+      mother_birth_year >= 1950 & mother_birth_year <= 1959 ~ "1950-1959",
+      mother_birth_year >= 1960 & mother_birth_year <= 1969 ~ "1960-1969",
+      mother_birth_year >= 1970 & mother_birth_year <= 1979 ~ "1970-1979",
+      mother_birth_year >= 1980 & mother_birth_year <= 1989 ~ "1980-1989",
+      mother_birth_year >= 1990 & mother_birth_year <= 1999 ~ "1990-1999",
+      mother_birth_year >= 2000 & mother_birth_year <= 2009 ~ "2000-2009",
+      mother_birth_year >= 2010 ~ ">2010"
+    ))
+
+# w1_birth_history <- w1_birth_history %>%
+#     mutate(mother_age_group = case_when(
+#       mother_birth_year <= 1909 ~ 1,
+#       mother_birth_year >= 1910 & mother_birth_year <= 1919 ~ 2,
+#       mother_birth_year >= 1920 & mother_birth_year <= 1929 ~ 3,
+#       mother_birth_year >= 1930 & mother_birth_year <= 1939 ~ 4,
+#       mother_birth_year >= 1940 & mother_birth_year <= 1949 ~ 5,
+#       mother_birth_year >= 1950 & mother_birth_year <= 1959 ~ 6,
+#       mother_birth_year >= 1960 & mother_birth_year <= 1969 ~ 7,
+#       mother_birth_year >= 1970 & mother_birth_year <= 1979 ~ 8,
+#       mother_birth_year >= 1980 & mother_birth_year <= 1989 ~ 9,
+#       mother_birth_year >= 1990 & mother_birth_year <= 1999 ~ 10,
+#       mother_birth_year >= 2000 & mother_birth_year <= 2009 ~ 11,
+#       mother_birth_year >= 2010 ~ 12
+#     ))
+
+ggplot(w1_birth_history, aes(x = age_birth1, y = age_birth2)) + 
+  geom_point() + 
+  geom_density_2d() +
+  facet_wrap(vars(mother_age_group))
+```
+
+
+
+```{r , echo=FALSE}
+
+# Joint density by education levels
+w1_indderived <- w1_indderived %>%
+  select(pid, w1_best_edu)
+
+w1_birth_history <- merge(w1_birth_history, w1_indderived, by = "pid")
+
+# Education groups
+# No schooling:                           25
+# Some primary schooling:                 0-6
+# Completed primary schooling:            7
+# Some secondary schooling:               8-11
+# Completed secondary schooling:          12
+# National technical certificate (1-3):   13-15
+# Certificate/diploma (less than Gr12):   16-17
+# Certificate/diploma (with Gr12):        18-19
+# Degree:                                 20-23
+# Other:                                  24
+
+w1_birth_history <- w1_birth_history %>%
+    mutate(education_group = case_when(
+      w1_best_edu == 25 ~ "No schooling",
+      w1_best_edu >= 0 & w1_best_edu <= 6 ~ "Some primary schooling",
+      w1_best_edu == 7 ~ "Completed primary schooling",
+      w1_best_edu >= 8 & w1_best_edu <= 11 ~ "Some secondary schooling",
+      w1_best_edu == 12 ~ "Completed secondary schooling",
+      w1_best_edu >= 13 & w1_best_edu <= 15 ~ "National technical certificate (1-3)",
+      w1_best_edu == 16 | w1_best_edu == 17 ~ "Certificate/diploma (less than Gr12)",
+      w1_best_edu == 18 | w1_best_edu == 19 ~ "Certificate/diploma (with Gr12)",
+      w1_best_edu >= 20 & w1_best_edu <= 23 ~ "Degree",
+      w1_best_edu == 24 ~ "Other"
+    ))
+
+
+ggplot(w1_birth_history, aes(x = age_birth1, y = age_birth2)) +
+  geom_point() +
+  geom_density_2d() +
+  facet_wrap(vars(education_group))
+
+```
